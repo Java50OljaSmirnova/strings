@@ -18,4 +18,16 @@ static public String ipV4Address(){
 	//return String.format("%s(\\.%s){3}", octet, octet);
 	return String.format("%1$s(\\.%1$s){3}", octet);
 }
+static public String arithmeticExpression() {
+	String operand = operand();
+	String operator = operator();
+	return String.format("%1$s(%2$s%1$s){0,}",operand, operator);
+}
+private static String operand() {
+	
+	return "\\s?([a-zA-Z$][\\w$]*|\\d+|\\d*\\.\\d*|_[\\w$]+)\\s?";
+}
+private static String operator() {
+	return "[+*-/]";
+}
 }
