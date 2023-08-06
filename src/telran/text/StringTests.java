@@ -1,89 +1,103 @@
 package telran.text;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static telran.strings.Strings.*;
 
-import java.util.Arrays;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class StringTests {
-	private static final int N_RUNS = 1000;
-	private static final int N_STRINGS = 1000;
-	String[] strings = {"12", "34", "56"};
-	String delimeter = "&";
-	String expected = "12&34&56";
-	@BeforeEach
-	void setUp() throws Exception {
-	}
-
 	@Test
-	@Disabled
-	void test() {
+	void javaVariableTrueTest() {
+		String regex = javaVariable();
+		assertTrue("a".matches(regex));
+		assertTrue("$".matches(regex));
+		assertTrue("c123".matches(regex));
+		assertTrue("__".matches(regex));
+		assertTrue("_$".matches(regex));
+		assertTrue("$_".matches(regex));
+		assertTrue("aA".matches(regex));
+		assertTrue("Bb".matches(regex));
 		
-		String str1 = "lmn";
-		updateString(str1);
-		assertEquals(str1, "lmn");
-		StringBuilder str2 = new StringBuilder("lmn");
-		updateString(str2);
-		assertEquals(str2.toString(), "lmnabc");
 	}
-	private void updateString(String str1) {
-		str1 += "abc";
+	@Test
+	void javaVariableFalseTest() {
+		String regex = javaVariable();
+		assertFalse("1a".matches(regex));
+		assertFalse("123".matches(regex));
+		assertFalse("a&c".matches(regex));
+		assertFalse("a C".matches(regex));
+		assertFalse("_".matches(regex));
+		
 	}
-	private void updateString(StringBuilder builder) {
-		builder.append("abc");
+	@Test
+	void zero_300_true_test() {
+		String regex = zero_300();
+		assertTrue("0".matches(regex));
+		assertTrue("10".matches(regex));
+		assertTrue("9".matches(regex));
+		assertTrue("100".matches(regex));
+		assertTrue("199".matches(regex));
+		assertTrue("200".matches(regex));
+		assertTrue("299".matches(regex));
+		assertTrue("300".matches(regex));
+		
 	}
-	private String joinStrings(String[] strings, String delimeter) {
-		String res = "";
-		if(strings != null && strings.length > 0) {
-			res = strings[0];
-			for(int i = 1; i < strings.length; i++) {
-				res += delimeter + strings[i];
-			}
-		}
-		return res;
+	@Test
+	void zero_300_false_test() {
+		String regex = zero_300();
+		assertFalse("01".matches(regex));
+		assertFalse("1 0".matches(regex));
+		assertFalse("1_0".matches(regex));
+		assertFalse("301".matches(regex));
+		assertFalse("1000".matches(regex));
+		assertFalse("-50".matches(regex));
+		assertFalse("6.5".matches(regex));
+		assertFalse("a".matches(regex));
 	}
-	private String joinStringsInBuilder(String[] strings, String delimeter) {
-		String res = "";
-		if(strings != null && strings.length > 0) {
-			StringBuilder builder = new StringBuilder(strings[0]);
-			for(int i = 1; i < strings.length; i++) {
-				builder.append(delimeter).append(strings[i]);
-			}
-			res = builder.toString();
-		}
-		return res;
+	@Test
+	void ipV4OctetTrueTest() {
+		String regex = ipV4Octet();
+		assertTrue("0".matches(regex));
+		assertTrue("00".matches(regex));
+		assertTrue("000".matches(regex));
+		assertTrue("01".matches(regex));
+		assertTrue("1".matches(regex));
+		assertTrue("199".matches(regex));
+		assertTrue("220".matches(regex));
+		assertTrue("249".matches(regex));
+		assertTrue("255".matches(regex));
+		
+	}
+	@Test
+	void ipV4OctetFalseTest() {
+		String regex = ipV4Octet();
+		assertFalse("-1".matches(regex));
+		assertFalse("a".matches(regex));
+		assertFalse("1 0".matches(regex));
+		assertFalse("0000".matches(regex));
+		assertFalse("256".matches(regex));
+		assertFalse("1000".matches(regex));
+		assertFalse("300".matches(regex));
+		
+	}
+	@Test
+	void ipV4AddressTrueTest() {
+		String regex = ipV4Address();
+		assertTrue("1.2.3.4".matches(regex));
+		assertTrue("0.0.0.0".matches(regex));
+		assertTrue("000.0.0.0".matches(regex));
+		assertTrue("255.255.255.255".matches(regex));
+	}
+	@Test
+	void ipV4AddressFalseTest() {
+		String regex = ipV4Address();
+		assertFalse("1.2.3".matches(regex));
+		assertFalse("1.2.3&4".matches(regex));
+		assertFalse("12.3".matches(regex));
+		assertFalse("100".matches(regex));
+		assertFalse("1 2 3 4".matches(regex));
+		assertFalse("1000".matches(regex));
+		assertFalse("300".matches(regex));
 	}
 	
-	@Test
-	void joinStringsTest() {
-		assertEquals(expected, joinStrings(strings, delimeter));
-	}
-	@Test
-	void joinStringsInBuilderTest() {
-		assertEquals(expected, joinStringsInBuilder(strings, delimeter));
-	}
-	@Test
-	void joinStringsPerformanceTest() {
-		String[] array = getBigArray();
-		for(int i = 0; i < N_RUNS; i++) {
-			joinStrings(array, " ");
-		}
-	}
-
-	private String[] getBigArray() {
-		String[] res = new String[N_STRINGS];
-		Arrays.fill(res, "Hello");
-		return res;
-	}
-
-	@Test
-	void joinStringsInBuilderPerformanceTest() {
-		String[] array = getBigArray();
-		for (int i = 0; i < N_RUNS; i++) {
-			joinStringsInBuilder(array, " ");
-		}
-	}
 }
