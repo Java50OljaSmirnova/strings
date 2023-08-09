@@ -1,6 +1,19 @@
 package telran.strings;
 
+import java.util.*;
+import java.util.function.BinaryOperator;
+
 public class Strings {
+	public static final String WRONG_EXPRESSION = "Wrong arithmetic expression syntax";
+	public static final String VARIABLE_NOT_DEFINED = "Variable is not defined";
+	static HashMap<String, BinaryOperator<Double>> mapOperations;
+	static {
+		mapOperations = new HashMap<>();
+		mapOperations.put("+", (a, b) -> a + b);
+		mapOperations.put("-", (a, b) -> a - b);
+		mapOperations.put("*", (a, b) -> a * b);
+		mapOperations.put("/", (a, b) -> a / b);
+	}
 static public String javaVariable() {
 	
 	return "[a-zA-Z$][\\w$]*|_[\\w$]+";
@@ -29,10 +42,70 @@ private static String operator() {
 private static String operand() {
 	String numberExp = numberExp();
 	String variableExp = javaVariable();
-	return String.format("\\s*((%s|%s))\\s*", numberExp, variableExp);
+//	return String.format("\\s*\\(*((%s|%s))\\)*\\s*", numberExp, variableExp);
+	return String.format("(\\s*\\(*\\s*)*((%s|%s))(\\s*\\)*\\s*)*", numberExp, variableExp);
 }
 private static String numberExp() {
 	
 	return "(\\d+\\.?\\d*|\\.\\d+)";
+}
+public static boolean isArithmeticExpression(String expression) {
+	boolean res =false;
+//	String expression1 = expression.replaceAll("\\s+", "");
+	if(bracketPairsValidation(expression)){
+//		res = expression1.matches(arithmeticExpression());
+		res = expression.matches(arithmeticExpression());
+	}
+	return res;
+}
+private static boolean bracketPairsValidation(String expression) {
+	boolean res = true;
+	int count = 0;
+	char[] chars = expression.toCharArray();
+	int index = 0;
+	while(index < chars.length && res) {
+		if(chars[index] == '(') {
+			count++;
+		} else if(chars[index] == ')') {
+			count--;
+			if(count < 0) {
+				res = false;
+			}
+		}
+		index++;
+	}
+	if(res) {
+		res = count == 0;
+	}
+	return res;
+}
+public static double calculation(String expression, Map<String, Double> variableValues) {
+	
+	if(!isArithmeticExpression(expression)) {
+		throw new IllegalArgumentException(WRONG_EXPRESSION);
+	}
+	expression = expression.replaceAll("[()\\s]+", ""); //removing brackets and spaces
+	String[] operators = expression.split(operand());
+	String[] operands = expression.split(operator());
+	double res = getValue(operands[0], variableValues);
+	for(int i = 1; i < operands.length; i++) {
+		double operand = getValue(operands[i], variableValues);
+		res = mapOperations.get(operators[i]).apply(res, operand);
+	}
+	return res;
+}
+private static double getValue(String operand, Map<String, Double> variableValues) {
+	double res = 0;
+	boolean number= operand.matches(numberExp());
+	if(number) {
+		res = Double.parseDouble(operand);
+	} else {
+		if(!variableValues.containsKey(operand)) {
+			throw new IllegalArgumentException(VARIABLE_NOT_DEFINED);
+		}
+		res = variableValues.get(operand);
+	}
+	 
+	return res;
 }
 }

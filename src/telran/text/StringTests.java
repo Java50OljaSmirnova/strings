@@ -3,9 +3,21 @@ package telran.text;
 import static org.junit.jupiter.api.Assertions.*;
 import static telran.strings.Strings.*;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BinaryOperator;
+
 import org.junit.jupiter.api.Test;
 
 class StringTests {
+	static HashMap<String, Double> mapOperands;
+	static {
+		mapOperands = new HashMap<>();
+		mapOperands.put("a", 13.5);
+		mapOperands.put("b", 21.0);
+		mapOperands.put("$", 3.7);
+		mapOperands.put("abc", 7.2);
+	}
 	@Test
 	void javaVariableTrueTest() {
 		String regex = javaVariable();
@@ -117,6 +129,41 @@ class StringTests {
 	assertFalse("25 .".matches(regex));
 	assertFalse("aA123*".matches(regex));
 	assertFalse(" + a * b".matches(regex));
-
+	}
+	
+	@Test
+	void isArithmeticExpressionTrueTest() {
+		assertTrue(isArithmeticExpression("(a + (b /2) ) * 100"));
+		assertTrue(isArithmeticExpression("(a + ((b /2) * 100)- 10 )"));
+		assertTrue(isArithmeticExpression(" (a + ( b /2 ) ) * 100"));
+		assertTrue(isArithmeticExpression("( a + ( (b /2 )  * 100  )- 10 )"));
+	}
+	@Test
+	void isArithmeticExpressionFalseTest() {
+		assertFalse(isArithmeticExpression("(a + ((b /2) * 100)- 10 )))"));
+		assertFalse(isArithmeticExpression("(a + ((b /2) (* 100)- 10 ))"));
+		assertFalse(isArithmeticExpression("(a + ((b)))) /2) * 100)- ((10 ))"));
+		
+	}
+	@Test
+	void calculationTrueTest() {
+	assertEquals(7, calculation("5 + 2", mapOperands));
+	assertEquals(3, calculation("7 - 4", mapOperands));
+	assertEquals(18, calculation("3 * 6", mapOperands));
+	assertEquals(2, calculation("18 / 9", mapOperands));
+	assertEquals(2, calculation("5 + ((2 - 4) * 6 )/ 9", mapOperands));
+	assertEquals(27.3, calculation("a+b - abc", mapOperands));
+	assertEquals(1725, calculation("(a + (b /2) ) * 100", mapOperands));
+	assertEquals(1, calculation(" .5 + $/2* 10.0 /21", mapOperands));
+	}
+	@Test
+	void calculationFalseTest() {
+	assertThrows(IllegalArgumentException.class,() -> calculation("(a + (c /2) ) * 100", mapOperands));
+	assertThrows(IllegalArgumentException.class,() -> calculation("1.5 + #/2*10 -21", mapOperands));
+	assertThrows(IllegalArgumentException.class,() -> calculation("1.5 # a/2*10 -21", mapOperands));
+	assertThrows(IllegalArgumentException.class,() -> calculation("5. + / 2* 0.0 /0 ", mapOperands));
+	assertThrows(IllegalArgumentException.class,() -> calculation("5 + ((2 - 4)", mapOperands));
+	assertThrows(IllegalArgumentException.class,() -> calculation("- a", mapOperands));
+	assertThrows(IllegalArgumentException.class,() -> calculation("_/2", mapOperands));
 	}
 }
