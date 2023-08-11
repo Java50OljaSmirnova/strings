@@ -95,15 +95,10 @@ public static double calculation(String expression, Map<String, Double> variable
 	return res;
 }
 private static double getValue(String operand, Map<String, Double> variableValues) {
-	double res = 0;
-	boolean number= operand.matches(numberExp());
-	if(number) {
-		res = Double.parseDouble(operand);
-	} else {
-		if(!variableValues.containsKey(operand)) {
+	
+	double res = operand.matches(numberExp()) ? Double.parseDouble(operand) : variableValues.getOrDefault(operand, Double.NaN);
+	if(Double.isNaN(res)) {
 			throw new IllegalArgumentException(VARIABLE_NOT_DEFINED);
-		}
-		res = variableValues.get(operand);
 	}
 	 
 	return res;

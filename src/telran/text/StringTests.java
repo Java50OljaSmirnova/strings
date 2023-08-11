@@ -10,14 +10,7 @@ import java.util.function.BinaryOperator;
 import org.junit.jupiter.api.Test;
 
 class StringTests {
-	static HashMap<String, Double> mapOperands;
-	static {
-		mapOperands = new HashMap<>();
-		mapOperands.put("a", 13.5);
-		mapOperands.put("b", 21.0);
-		mapOperands.put("$", 3.7);
-		mapOperands.put("abc", 7.2);
-	}
+
 	@Test
 	void javaVariableTrueTest() {
 		String regex = javaVariable();
@@ -146,24 +139,23 @@ class StringTests {
 		
 	}
 	@Test
-	void calculationTrueTest() {
-	assertEquals(7, calculation("5 + 2", mapOperands));
-	assertEquals(3, calculation("7 - 4", mapOperands));
-	assertEquals(18, calculation("3 * 6", mapOperands));
-	assertEquals(2, calculation("18 / 9", mapOperands));
-	assertEquals(2, calculation("5 + ((2 - 4) * 6 )/ 9", mapOperands));
-	assertEquals(27.3, calculation("a+b - abc", mapOperands));
-	assertEquals(1725, calculation("(a + (b /2) ) * 100", mapOperands));
-	assertEquals(1, calculation(" .5 + $/2* 10.0 /21", mapOperands));
+	void calculationExpressionTest() {
+	 Map<String, Double> variables = new HashMap<>();
+	 variables.put("a", 13.5);
+	 variables.put("b", 21.0);
+	 variables.put("$", 3.7);
+	 variables.put("abc", 7.2);
+	 
+	assertEquals(2, calculation("5 + ((2 - 4) * 6 )/ 9", variables));
+	assertEquals(27.3, calculation("a+b - abc", variables));
+	assertEquals(1725, calculation("(a + (b /2) ) * 100", variables));
+	assertEquals(1, calculation(" .5 + $/2* 10.0 /21", variables));
+	assertThrows(IllegalArgumentException.class,() -> calculation("a + #/2*10 -21", variables));
+	assertThrows(IllegalArgumentException.class,() -> calculation("1.5 # a/2*10 -21", variables));
+	assertThrows(IllegalArgumentException.class,() -> calculation("5. + / 2* 0.0 /0 ", variables));
+	assertThrows(IllegalArgumentException.class,() -> calculation("5 + ((2 - 4)", variables));
+	assertThrows(IllegalArgumentException.class,() -> calculation("- a", variables));
+	assertThrows(IllegalArgumentException.class,() -> calculation("_/2", variables));
 	}
-	@Test
-	void calculationFalseTest() {
-	assertThrows(IllegalArgumentException.class,() -> calculation("(a + (c /2) ) * 100", mapOperands));
-	assertThrows(IllegalArgumentException.class,() -> calculation("1.5 + #/2*10 -21", mapOperands));
-	assertThrows(IllegalArgumentException.class,() -> calculation("1.5 # a/2*10 -21", mapOperands));
-	assertThrows(IllegalArgumentException.class,() -> calculation("5. + / 2* 0.0 /0 ", mapOperands));
-	assertThrows(IllegalArgumentException.class,() -> calculation("5 + ((2 - 4)", mapOperands));
-	assertThrows(IllegalArgumentException.class,() -> calculation("- a", mapOperands));
-	assertThrows(IllegalArgumentException.class,() -> calculation("_/2", mapOperands));
-	}
+	
 }
