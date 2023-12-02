@@ -11,32 +11,23 @@ public class JoinStringsPerformanceAppl {
 	private static final int N_RUNS = 1000;
 	private static final String BASE_PACKAGE = "telran.text.";
 
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
-		if (args.length < 3) {
-			System.out.println("There should be 3 arguments <name of class as an argument>");
-		} else {
 			String[] strings = getStrings();
-			JoinStrings[] joinStringsArray = new JoinStrings[args.length];
-			for (int i = 0; i < args.length; i++) {
-				@SuppressWarnings("unchecked")
-				Class<JoinStrings> clazz = (Class<JoinStrings>) Class.forName(BASE_PACKAGE + args[i]);
-				Constructor<JoinStrings> constructor = clazz.getConstructor();
-				joinStringsArray[i] = constructor.newInstance();
-			}
-			PerformanceTest[] performanceTestArray = getTest(args, strings, joinStringsArray);
-			for (PerformanceTest test : performanceTestArray) {
-				test.run();
-			}
+			for (String className: args ) {
+				try {
+					Class<JoinStrings> clazz = (Class<JoinStrings>) Class.forName(BASE_PACKAGE + className);
+					Constructor<JoinStrings> constructor = clazz.getConstructor();
+					JoinStrings joinStrings = constructor.newInstance();
+					JoinStringsPerformanceTest test = new JoinStringsPerformanceTest(getTestName(clazz.getSimpleName()), N_RUNS, strings, joinStrings);
+					test.run();
+				} catch (ClassNotFoundException e) {
+					System.out.println(e);
+				} catch(Exception e) {
+					e.printStackTrace();
+					
+				}
 		}
-	}
-
-	private static PerformanceTest[] getTest(String[] className, String[] strings, JoinStrings[] joinStringsArray) {
-		PerformanceTest[] array = new PerformanceTest[joinStringsArray.length];
-		for (int i = 0; i < array.length; i++) {
-			String testName = getTestName(className[i]);
-			array[i] = new JoinStringsPerformanceTest(testName, N_RUNS, strings, joinStringsArray[i]);
-		}
-		return array;
 	}
 
 	private static String getTestName(String className) {
